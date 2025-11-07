@@ -1,65 +1,362 @@
+"use client";
+
+import { Navbar } from "@/components/Navbar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
+import { useState, useEffect } from "react";
+
+const heroSlides = [
+  {
+    badge: "Beauty Collection",
+    title: "Discover Your Perfect Glow",
+    description: "Premium skincare, makeup, and beauty essentials for radiant skin",
+    bgColor: "from-rose-50 to-pink-100 dark:from-rose-900/50 dark:to-pink-900/50",
+    category: "beauty",
+    image: "https://c1.wallpaperflare.com/preview/854/72/952/black-white-flat-lay-cosmetics-makeup-brush-kit.jpg",
+  },
+  {
+    badge: "Fragrance Paradise",
+    title: "Signature Scents Await",
+    description: "Luxurious perfumes and colognes that define your presence",
+    bgColor: "from-purple-50 to-violet-100 dark:from-purple-900/50 dark:to-violet-900/50",
+    category: "fragrances",
+    image: "https://ads-perfumes.com/wp-content/uploads/2025/03/Niche-perfumes.jpg",
+  },
+  {
+    badge: "Fashion Forward",
+    title: "Summer Arrival of Outfit",
+    description: "Trendy clothing and accessories that match your unique style",
+    bgColor: "from-amber-50 to-orange-100 dark:from-amber-900/50 dark:to-orange-900/50",
+    category: "fashion",
+    image: "https://assets.vogue.com/photos/66da738bbd1f0f52e7b90ddc/1:1/w_3000,h_3000,c_limit/RALPHLAUREN_SS25_BACKSTAGE_EMILYMALAN_23.jpg",
+  },
+];
 
 export default function Home() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+    }, 5000); // Auto-advance every 5 seconds
+
+    return () => clearInterval(timer);
+  }, []);
+
+  const nextSlide = () => {
+    setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
+  };
+
+  const prevSlide = () => {
+    setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
+  };
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-background">
+      <Navbar />
+      
+      <main>
+        {/* Hero Carousel Section */}
+        <section className="relative overflow-hidden">
+          {/* Slides */}
+          <div className="relative">
+            {heroSlides.map((slide, index) => (
+              <div
+                key={index}
+                className={`transition-all duration-700 ease-in-out ${
+                  index === currentSlide ? "opacity-100" : "opacity-0 absolute inset-0"
+                }`}
+              >
+                <div className="relative h-[600px] md:h-[700px]">
+                  {/* Background Image */}
+                  <div className="absolute inset-0">
+                    <Image
+                      src={slide.image}
+                      alt={slide.title}
+                      fill
+                      className="object-cover"
+                      priority={index === 0}
+                    />
+                    {/* Gradient Overlays */}
+                    <div className={`absolute inset-0 bg-gradient-to-r ${slide.bgColor} opacity-20`} />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
+                  </div>
+
+                  {/* Content Overlay */}
+                  <div className="relative h-full flex items-center">
+                    <div className="container mx-auto px-4">
+                      <div className="max-w-2xl">
+                        <Badge variant="secondary" className="w-fit mb-4 bg-white/90 backdrop-blur">
+                          {slide.badge}
+                        </Badge>
+                        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white drop-shadow-2xl">
+                          {slide.title}
+                        </h1>
+                        <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-lg">
+                          {slide.description}
+                        </p>
+                        <Button size="lg" className="gap-2 bg-white text-black hover:bg-white/90 shadow-xl">
+                          Explore Product
+                          <ArrowRight className="h-5 w-5" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Navigation Arrows */}
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur"
+            onClick={prevSlide}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur"
+            onClick={nextSlide}
           >
-            Documentation
-          </a>
-        </div>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+
+          {/* Dots Indicator */}
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`h-2 rounded-full transition-all ${
+                  index === currentSlide
+                    ? "w-8 bg-primary"
+                    : "w-2 bg-primary/30 hover:bg-primary/50"
+                }`}
+                aria-label={`Go to slide ${index + 1}`}
+              />
+            ))}
+          </div>
+        </section>
+
+        {/* Featured Cards */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Card 1 */}
+            <Card className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="relative h-64 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-4 p-6">
+                    <h3 className="text-2xl font-bold">Where dreams meet couture</h3>
+                    <Button variant="outline" className="gap-2">
+                      Shop Now
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* Card 2 */}
+            <Card className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+              <div className="relative h-64 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-800/20">
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-center space-y-4 p-6">
+                    <h3 className="text-2xl font-bold">Enchanting styles for every woman</h3>
+                    <Button variant="outline" className="gap-2">
+                      Shop Now
+                      <ArrowRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </section>
+
+        {/* Browse by Categories */}
+        <section className="container mx-auto px-4 py-12">
+          <h2 className="text-3xl font-bold mb-8">Browse by categories</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { name: "Shoes", color: "from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30" },
+              { name: "Beauty", color: "from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30" },
+              { name: "Bag", color: "from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30" },
+              { name: "T-Shirt", color: "from-stone-100 to-stone-200 dark:from-stone-800/30 dark:to-stone-700/30" },
+            ].map((category) => (
+              <Card
+                key={category.name}
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105"
+              >
+                <div className={`h-40 bg-gradient-to-br ${category.color} flex items-center justify-center`}>
+                  <span className="text-sm text-muted-foreground">Image</span>
+                </div>
+                <CardContent className="p-4 text-center">
+                  <h3 className="font-semibold">{category.name}</h3>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        {/* Popular Products Preview */}
+        <section className="container mx-auto px-4 py-12">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-bold">Popular products</h2>
+            <div className="flex gap-2">
+              <Button variant="outline" size="sm">All</Button>
+              <Button variant="ghost" size="sm">Shirts</Button>
+              <Button variant="ghost" size="sm">Jackets</Button>
+              <Button variant="ghost" size="sm">Shoes</Button>
+              <Button variant="ghost" size="sm">T-Shirt</Button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((item) => (
+              <Card key={item} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                    <span className="text-sm">Product {item}</span>
+                  </div>
+                  <Badge className="absolute top-2 right-2" variant="destructive">
+                    -20%
+                  </Badge>
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-2">Product Name</h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm">4.5</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-lg font-bold">$99</span>
+                    <span className="text-sm text-muted-foreground line-through">$120</span>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          <div className="text-center mt-8">
+            <Button variant="outline" size="lg">
+              View All Products
+            </Button>
+          </div>
+        </section>
+
+        {/* Customer Reviews */}
+        <section className="bg-slate-50 dark:bg-slate-900 py-16">
+          <div className="container mx-auto px-4">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-2">Over 350+ Customer</h2>
+              <p className="text-muted-foreground">reviews form our client</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="aspect-square rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center"
+                >
+                  <span className="text-sm text-muted-foreground">Customer {item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Exclusive Offer */}
+        <section className="container mx-auto px-4 py-16">
+          <Card className="bg-gradient-to-r from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 border-none">
+            <CardContent className="p-12 text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                EXCLUSIVE FASHION OFFERS
+              </h2>
+              <p className="text-lg mb-6">AWAIT FOR YOUR</p>
+              <Button size="lg" className="gap-2">
+                Subscribe Newsletter
+                <ArrowRight className="h-4 w-4" />
+              </Button>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* You Might Also Like */}
+        <section className="container mx-auto px-4 py-12">
+          <h2 className="text-3xl font-bold mb-8">You might also like</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+            {[1, 2, 3, 4].map((item) => (
+              <Card key={item} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
+                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
+                    <span className="text-sm">Product {item}</span>
+                  </div>
+                </div>
+                <CardContent className="p-4">
+                  <h3 className="font-semibold mb-2">Gradient Graphic T-shirt</h3>
+                  <div className="flex items-center gap-1 mb-2">
+                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-sm">3.5/5</span>
+                  </div>
+                  <span className="text-lg font-bold">$145</span>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-slate-100 dark:bg-slate-900 mt-16">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div>
+              <h3 className="font-bold mb-4">Company</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>About</li>
+                <li>Features</li>
+                <li>Works</li>
+                <li>Career</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">Help</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Customer Support</li>
+                <li>Delivery Details</li>
+                <li>Terms & Conditions</li>
+                <li>Privacy Policy</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">FAQ</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Account</li>
+                <li>Manage Deliveries</li>
+                <li>Orders</li>
+                <li>Payments</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-bold mb-4">Resources</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>Free eBooks</li>
+                <li>Development Tutorial</li>
+                <li>How to - Blog</li>
+                <li>Youtube Playlist</li>
+              </ul>
+            </div>
+          </div>
+          <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
+            <p>© 2024 Nextgen. All rights reserved.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
