@@ -2,22 +2,22 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Heart, ShoppingCart, User, Search, Menu, Moon, Sun } from "lucide-react";
+import { Heart, ShoppingCart, User, Search, Menu, Moon, Sun, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
-import { logout } from "@/app/redux/slices/authSlice";
 import { toggleTheme } from "@/app/redux/slices/themeSlice";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const dispatch = useAppDispatch();
-  const { isAuthenticated, user } = useAppSelector((state) => state.auth);
   const favorites = useAppSelector((state) => state.favorites.items);
   const theme = useAppSelector((state) => state.theme.mode);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { isAuthenticated, logout } = useAuth();
 
   useEffect(() => {
     if (theme === "dark") {
@@ -27,36 +27,19 @@ export function Navbar() {
     }
   }, [theme]);
 
-  const handleLogout = () => {
-    dispatch(logout());
-    router.push("/login");
-  };
-
   const handleThemeToggle = () => {
     dispatch(toggleTheme());
   };
 
-  if (pathname === "/login") return null;
-
   return (
     <nav className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      {/* Top Bar */}
-      <div className="container mx-auto px-4">
-        <div className="flex h-16 items-center justify-between">
-          {/* Left: Logo & Menu */}
+      <div className="container mx-auto">
+        <div className="flex h-16 items-center justify-between px-4">
+          {/* Left: Logo and Navigation */}
           <div className="flex items-center gap-6">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-            
             <Link href="/" className="flex items-center gap-2">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <span className="text-lg font-bold">N</span>
+              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary">
+                <span className="text-lg font-bold text-primary-foreground">F</span>
               </div>
               <span className="hidden text-xl font-bold sm:inline-block">FASTeco</span>
             </Link>
@@ -65,34 +48,29 @@ export function Navbar() {
             <div className="hidden items-center gap-1 md:flex">
               <Link href="/">
                 <Button variant={pathname === "/" ? "default" : "ghost"} size="sm">
-                  Men
+                  Home
                 </Button>
               </Link>
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  Women
+              <Link href="/products">
+                <Button variant={pathname === "/products" ? "default" : "ghost"} size="sm">
+                  Products
                 </Button>
               </Link>
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  Children
-                </Button>
-              </Link>
-              <Link href="/">
-                <Button variant="ghost" size="sm">
-                  Beauty
+              <Link href="/favorites">
+                <Button variant={pathname === "/favorites" ? "default" : "ghost"} size="sm">
+                  Favorites
                 </Button>
               </Link>
             </div>
           </div>
 
           {/* Center: Search */}
-          <div className="hidden flex-1 max-w-md mx-8 lg:flex">
-            <div className="relative w-full">
+          <div className="hidden flex-1 justify-center px-8 lg:flex">
+            <div className="relative w-full max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search"
+                placeholder="Search for products..."
                 className="w-full pl-10"
               />
             </div>
@@ -120,14 +98,9 @@ export function Navbar() {
             </Button>
 
             {isAuthenticated ? (
-              <div className="flex items-center gap-2">
-                <span className="hidden text-sm text-muted-foreground lg:inline">
-                  {user?.username}
-                </span>
-                <Button variant="outline" size="sm" onClick={handleLogout}>
-                  Logout
-                </Button>
-              </div>
+              <Button variant="ghost" size="icon" onClick={logout} title="Logout">
+                <LogOut className="h-5 w-5" />
+              </Button>
             ) : (
               <Link href="/login">
                 <Button variant="default" size="sm">
@@ -136,8 +109,38 @@ export function Navbar() {
                 </Button>
               </Link>
             )}
+
+            {/* Mobile Menu */}
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <Menu className="h-5 w-5" />
+            </Button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <div className="border-t bg-background md:hidden">
+            <div className="container mx-auto px-4 py-4">
+              <div className="flex flex-col gap-2">
+                <Link href="/" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Home
+                  </Button>
+                </Link>
+                <Link href="/products" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Products
+                  </Button>
+                </Link>
+                <Link href="/favorites" onClick={() => setMobileMenuOpen(false)}>
+                  <Button variant="ghost" className="w-full justify-start">
+                    Favorites
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Mobile Search */}
         <div className="pb-4 lg:hidden">
@@ -151,36 +154,6 @@ export function Navbar() {
           </div>
         </div>
       </div>
-
-      {/* Mobile Menu */}
-      {mobileMenuOpen && (
-        <div className="border-t bg-background md:hidden">
-          <div className="container mx-auto px-4 py-4">
-            <div className="flex flex-col gap-2">
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Men
-                </Button>
-              </Link>
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Women
-                </Button>
-              </Link>
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Children
-                </Button>
-              </Link>
-              <Link href="/" onClick={() => setMobileMenuOpen(false)}>
-                <Button variant="ghost" className="w-full justify-start">
-                  Beauty
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      )}
     </nav>
   );
 }

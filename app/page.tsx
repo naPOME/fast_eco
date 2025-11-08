@@ -4,9 +4,13 @@ import { Navbar } from "@/components/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ArrowRight, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, Star, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
 import Image from "next/image";
 import { useState, useEffect } from "react";
+import Link from "next/link";
+import { productApi } from "@/services/api";
+import { Product } from "@/types/product";
+import axios from "axios";
 
 const heroSlides = [
   {
@@ -37,13 +41,44 @@ const heroSlides = [
 
 export default function Home() {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [customers, setCustomers] = useState<any[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 5000); // Auto-advance every 5 seconds
+    }, 5000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await productApi.getProducts(8, 0);
+        setProducts(response.products);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        const response = await axios.get("https://dummyjson.com/users?limit=6");
+        setCustomers(response.data.users);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+      }
+    };
+
+    fetchCustomers();
   }, []);
 
   const nextSlide = () => {
@@ -53,6 +88,7 @@ export default function Home() {
   const prevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length);
   };
+
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
@@ -60,7 +96,6 @@ export default function Home() {
       <main>
         {/* Hero Carousel Section */}
         <section className="relative overflow-hidden">
-          {/* Slides */}
           <div className="relative">
             {heroSlides.map((slide, index) => (
               <div
@@ -70,7 +105,6 @@ export default function Home() {
                 }`}
               >
                 <div className="relative h-[600px] md:h-[700px]">
-                  {/* Background Image */}
                   <div className="absolute inset-0">
                     <Image
                       src={slide.image}
@@ -79,12 +113,10 @@ export default function Home() {
                       className="object-cover"
                       priority={index === 0}
                     />
-                    {/* Gradient Overlays */}
                     <div className={`absolute inset-0 bg-gradient-to-r ${slide.bgColor} opacity-20`} />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/40 to-transparent" />
                   </div>
 
-                  {/* Content Overlay */}
                   <div className="relative h-full flex items-center">
                     <div className="container mx-auto px-4">
                       <div className="max-w-2xl">
@@ -97,10 +129,12 @@ export default function Home() {
                         <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-lg">
                           {slide.description}
                         </p>
-                        <Button size="lg" className="gap-2 bg-white text-black hover:bg-white/90 shadow-xl">
-                          Explore Product
-                          <ArrowRight className="h-5 w-5" />
-                        </Button>
+                        <Link href="/products">
+                          <Button size="lg" className="gap-2 bg-white text-black hover:bg-white/90 shadow-xl">
+                            Explore Products
+                            <ArrowRight className="h-5 w-5" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   </div>
@@ -109,7 +143,6 @@ export default function Home() {
             ))}
           </div>
 
-          {/* Navigation Arrows */}
           <Button
             variant="outline"
             size="icon"
@@ -127,7 +160,6 @@ export default function Home() {
             <ChevronRight className="h-4 w-4" />
           </Button>
 
-          {/* Dots Indicator */}
           <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-10 flex gap-2">
             {heroSlides.map((_, index) => (
               <button
@@ -147,31 +179,45 @@ export default function Home() {
         {/* Featured Cards */}
         <section className="container mx-auto px-4 py-12">
           <div className="grid gap-6 md:grid-cols-2">
-            {/* Card 1 */}
             <Card className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
               <div className="relative h-64 bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/20 dark:to-amber-800/20">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <Image
+                  src="https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=800&q=80"
+                  alt="Fashion Collection"
+                  fill
+                  className="object-cover opacity-30"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-amber-50/80 to-amber-100/80 dark:from-amber-900/60 dark:to-amber-800/60">
                   <div className="text-center space-y-4 p-6">
                     <h3 className="text-2xl font-bold">Where dreams meet couture</h3>
-                    <Button variant="outline" className="gap-2">
-                      Shop Now
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    <Link href="/products">
+                      <Button variant="outline" className="gap-2">
+                        Shop Now
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
             </Card>
 
-            {/* Card 2 */}
             <Card className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
               <div className="relative h-64 bg-gradient-to-br from-rose-50 to-rose-100 dark:from-rose-900/20 dark:to-rose-800/20">
-                <div className="absolute inset-0 flex items-center justify-center">
+                <Image
+                  src="https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&q=80"
+                  alt="Women's Fashion"
+                  fill
+                  className="object-cover opacity-30"
+                />
+                <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-rose-50/80 to-rose-100/80 dark:from-rose-900/60 dark:to-rose-800/60">
                   <div className="text-center space-y-4 p-6">
                     <h3 className="text-2xl font-bold">Enchanting styles for every woman</h3>
-                    <Button variant="outline" className="gap-2">
-                      Shop Now
-                      <ArrowRight className="h-4 w-4" />
-                    </Button>
+                    <Link href="/products">
+                      <Button variant="outline" className="gap-2">
+                        Shop Now
+                        <ArrowRight className="h-4 w-4" />
+                      </Button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -179,74 +225,62 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Browse by Categories */}
-        <section className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold mb-8">Browse by categories</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[
-              { name: "Shoes", color: "from-orange-100 to-orange-200 dark:from-orange-900/30 dark:to-orange-800/30" },
-              { name: "Beauty", color: "from-amber-100 to-amber-200 dark:from-amber-900/30 dark:to-amber-800/30" },
-              { name: "Bag", color: "from-slate-100 to-slate-200 dark:from-slate-800/30 dark:to-slate-700/30" },
-              { name: "T-Shirt", color: "from-stone-100 to-stone-200 dark:from-stone-800/30 dark:to-stone-700/30" },
-            ].map((category) => (
-              <Card
-                key={category.name}
-                className="overflow-hidden cursor-pointer hover:shadow-lg transition-all hover:scale-105"
-              >
-                <div className={`h-40 bg-gradient-to-br ${category.color} flex items-center justify-center`}>
-                  <span className="text-sm text-muted-foreground">Image</span>
-                </div>
-                <CardContent className="p-4 text-center">
-                  <h3 className="font-semibold">{category.name}</h3>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </section>
-
-        {/* Popular Products Preview */}
+        {/* Popular Products */}
         <section className="container mx-auto px-4 py-12">
           <div className="flex items-center justify-between mb-8">
             <h2 className="text-3xl font-bold">Popular products</h2>
-            <div className="flex gap-2">
-              <Button variant="outline" size="sm">All</Button>
-              <Button variant="ghost" size="sm">Shirts</Button>
-              <Button variant="ghost" size="sm">Jackets</Button>
-              <Button variant="ghost" size="sm">Shoes</Button>
-              <Button variant="ghost" size="sm">T-Shirt</Button>
-            </div>
+            <Link href="/products">
+              <Button variant="outline">View All</Button>
+            </Link>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
-              <Card key={item} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
-                <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                    <span className="text-sm">Product {item}</span>
-                  </div>
-                  <Badge className="absolute top-2 right-2" variant="destructive">
-                    -20%
-                  </Badge>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Product Name</h3>
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm">4.5</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-lg font-bold">$99</span>
-                    <span className="text-sm text-muted-foreground line-through">$120</span>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex justify-center items-center py-16">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {products.map((product) => (
+                <Link key={product.id} href={`/products/${product.id}`}>
+                  <Card className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
+                    <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
+                      <Image
+                        src={product.thumbnail}
+                        alt={product.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                      {product.discountPercentage > 0 && (
+                        <Badge className="absolute top-2 right-2" variant="destructive">
+                          -{Math.round(product.discountPercentage)}%
+                        </Badge>
+                      )}
+                    </div>
+                    <CardContent className="p-4">
+                      <h3 className="font-semibold mb-2 line-clamp-2">{product.title}</h3>
+                      <div className="flex items-center gap-1 mb-2">
+                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                        <span className="text-sm">{product.rating.toFixed(1)}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg font-bold">${product.price}</span>
+                        {product.discountPercentage > 0 && (
+                          <span className="text-sm text-muted-foreground line-through">
+                            ${(product.price / (1 - product.discountPercentage / 100)).toFixed(2)}
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          )}
 
           <div className="text-center mt-8">
-            <Button variant="outline" size="lg">
-              View All Products
-            </Button>
+            <Link href="/products">
+              <Button size="lg">View All Products</Button>
+            </Link>
           </div>
         </section>
 
@@ -255,15 +289,24 @@ export default function Home() {
           <div className="container mx-auto px-4">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold mb-2">Over 350+ Customer</h2>
-              <p className="text-muted-foreground">reviews form our client</p>
+              <p className="text-muted-foreground">reviews from our clients</p>
             </div>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {[1, 2, 3].map((item) => (
+            <div className="flex gap-4 overflow-x-auto pb-4 max-w-6xl mx-auto scrollbar-hide">
+              {customers.map((customer) => (
                 <div
-                  key={item}
-                  className="aspect-square rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex items-center justify-center"
+                  key={customer.id}
+                  className="flex-shrink-0 w-32 h-32 rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-700 dark:to-slate-600 flex flex-col items-center justify-center p-3 hover:scale-105 transition-transform"
                 >
-                  <span className="text-sm text-muted-foreground">Customer {item}</span>
+                  <div className="relative w-16 h-16 mb-2">
+                    <Image
+                      src={customer.image}
+                      alt={`${customer.firstName} ${customer.lastName}`}
+                      width={64}
+                      height={64}
+                      className="rounded-full object-cover"
+                    />
+                  </div>
+                  <p className="text-xs font-semibold text-center truncate w-full">{customer.firstName}</p>
                 </div>
               ))}
             </div>
@@ -272,8 +315,14 @@ export default function Home() {
 
         {/* Exclusive Offer */}
         <section className="container mx-auto px-4 py-16">
-          <Card className="bg-gradient-to-r from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 border-none">
-            <CardContent className="p-12 text-center">
+          <Card className="relative overflow-hidden bg-gradient-to-r from-rose-100 to-pink-100 dark:from-rose-900/30 dark:to-pink-900/30 border-none">
+            <Image
+              src="https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=1200&q=80"
+              alt="Newsletter"
+              fill
+              className="object-cover opacity-20"
+            />
+            <CardContent className="relative p-12 text-center">
               <h2 className="text-3xl md:text-4xl font-bold mb-4">
                 EXCLUSIVE FASHION OFFERS
               </h2>
@@ -284,30 +333,6 @@ export default function Home() {
               </Button>
             </CardContent>
           </Card>
-        </section>
-
-        {/* You Might Also Like */}
-        <section className="container mx-auto px-4 py-12">
-          <h2 className="text-3xl font-bold mb-8">You might also like</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {[1, 2, 3, 4].map((item) => (
-              <Card key={item} className="overflow-hidden group cursor-pointer hover:shadow-lg transition-shadow">
-                <div className="relative h-64 bg-slate-100 dark:bg-slate-800">
-                  <div className="absolute inset-0 flex items-center justify-center text-muted-foreground">
-                    <span className="text-sm">Product {item}</span>
-                  </div>
-                </div>
-                <CardContent className="p-4">
-                  <h3 className="font-semibold mb-2">Gradient Graphic T-shirt</h3>
-                  <div className="flex items-center gap-1 mb-2">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-sm">3.5/5</span>
-                  </div>
-                  <span className="text-lg font-bold">$145</span>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
         </section>
       </main>
 
@@ -353,7 +378,7 @@ export default function Home() {
             </div>
           </div>
           <div className="border-t mt-8 pt-8 text-center text-sm text-muted-foreground">
-            <p>© 2024 Nextgen. All rights reserved.</p>
+            <p> 2025 FastEco. All rights reserved.</p>
           </div>
         </div>
       </footer>
