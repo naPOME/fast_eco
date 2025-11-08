@@ -19,7 +19,7 @@ export default function ProductsPage() {
   const [skip, setSkip] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [total, setTotal] = useState(0);
-  const [categories, setCategories] = useState<string[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const observerTarget = useRef<HTMLDivElement>(null);
   const limit = 10;
