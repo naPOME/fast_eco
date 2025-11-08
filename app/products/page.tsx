@@ -160,16 +160,21 @@ export default function ProductsPage() {
             >
               All Products
             </Badge>
-            {categories.map((category) => (
-              <Badge
-                key={category}
-                variant={selectedCategory === category ? "default" : "outline"}
-                className="cursor-pointer px-4 py-2 text-sm capitalize"
-                onClick={() => handleCategoryChange(category)}
-              >
-                {category.replace(/-/g, " ")}
-              </Badge>
-            ))}
+            {categories.map((category) => {
+              const categoryName = typeof category === 'string' ? category : category.name || category.slug || '';
+              const categoryValue = typeof category === 'string' ? category : category.slug || category.name || '';
+              
+              return (
+                <Badge
+                  key={categoryValue}
+                  variant={selectedCategory === categoryValue ? "default" : "outline"}
+                  className="cursor-pointer px-4 py-2 text-sm capitalize"
+                  onClick={() => handleCategoryChange(categoryValue)}
+                >
+                  {categoryName.replace(/-/g, " ")}
+                </Badge>
+              );
+            })}
           </div>
         </div>
 

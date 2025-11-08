@@ -44,6 +44,8 @@ export default function Home() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [customers, setCustomers] = useState<any[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -56,7 +58,9 @@ export default function Home() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await productApi.getProducts(8, 0);
+        const response = selectedCategory === "all" 
+          ? await productApi.getProducts(8, 0)
+          : await productApi.getProductsByCategory(selectedCategory, 8, 0);
         setProducts(response.products);
       } catch (error) {
         console.error("Error fetching products:", error);
@@ -66,7 +70,7 @@ export default function Home() {
     };
 
     fetchProducts();
-  }, []);
+  }, [selectedCategory]);
 
   useEffect(() => {
     const fetchCustomers = async () => {
@@ -80,6 +84,23 @@ export default function Home() {
 
     fetchCustomers();
   }, []);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await productApi.getCategories();
+        setCategories(cats.slice(0, 6)); // Show only first 6 categories
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  const handleCategoryChange = (category: string) => {
+    setSelectedCategory(category);
+    setLoading(true);
+  };
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % heroSlides.length);
@@ -232,6 +253,34 @@ export default function Home() {
             <Link href="/products">
               <Button variant="outline">View All</Button>
             </Link>
+          </div>
+
+          {/* Category Filter */}
+          <div className="mb-6">
+            <div className="flex flex-wrap gap-2 justify-center">
+              <Badge
+                variant={selectedCategory === "all" ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-sm"
+                onClick={() => handleCategoryChange("all")}
+              >
+                All
+              </Badge>
+              {categories.map((category) => {
+                const categoryName = typeof category === 'string' ? category : category.name || category.slug || '';
+                const categoryValue = typeof category === 'string' ? category : category.slug || category.name || '';
+                
+                return (
+                  <Badge
+                    key={categoryValue}
+                    variant={selectedCategory === categoryValue ? "default" : "outline"}
+                    className="cursor-pointer px-4 py-2 text-sm capitalize"
+                    onClick={() => handleCategoryChange(categoryValue)}
+                  >
+                    {categoryName.replace(/-/g, " ")}
+                  </Badge>
+                );
+              })}
+            </div>
           </div>
 
           {loading ? (
