@@ -86,8 +86,24 @@ export default function CreateProductPage() {
       };
 
       const newProduct = await productApi.createProduct(productData);
+      
+      // Create a complete product object with mock data
+      const completeProduct = {
+        ...newProduct,
+        id: Date.now(), // Use timestamp as unique ID
+        thumbnail: "https://via.placeholder.com/300x300?text=New+Product",
+        images: ["https://via.placeholder.com/300x300?text=New+Product"],
+        rating: 0,
+        discountPercentage: 0,
+      };
+
+      // Dispatch custom event to notify products page
+      window.dispatchEvent(
+        new CustomEvent("productCreated", { detail: completeProduct })
+      );
+
       toast.success("Product created successfully!");
-      router.push(`/products/${newProduct.id}`);
+      router.push("/products");
     } catch (error) {
       console.error("Error creating product:", error);
       toast.error("Failed to create product");

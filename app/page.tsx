@@ -144,7 +144,7 @@ export default function Home() {
                         <Badge variant="secondary" className="w-fit mb-4 bg-white/90 backdrop-blur">
                           {slide.badge}
                         </Badge>
-                        <h1 className="text-5xl md:text-7xl font-bold leading-tight mb-6 text-white drop-shadow-2xl">
+                        <h1 className="text-5xl md:text-7xl font-bold mb-6 text-white drop-shadow-2xl">
                           {slide.title}
                         </h1>
                         <p className="text-xl md:text-2xl mb-8 text-white/90 drop-shadow-lg">
@@ -167,7 +167,7 @@ export default function Home() {
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur"
+            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur hover:bg-white"
             onClick={prevSlide}
           >
             <ChevronLeft className="h-4 w-4" />
@@ -175,7 +175,7 @@ export default function Home() {
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 backdrop-blur"
+            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 bg-white/80 backdrop-blur hover:bg-white"
             onClick={nextSlide}
           >
             <ChevronRight className="h-4 w-4" />
@@ -187,9 +187,7 @@ export default function Home() {
                 key={index}
                 onClick={() => setCurrentSlide(index)}
                 className={`h-2 rounded-full transition-all ${
-                  index === currentSlide
-                    ? "w-8 bg-primary"
-                    : "w-2 bg-primary/30 hover:bg-primary/50"
+                  index === currentSlide ? "w-8 bg-white" : "w-2 bg-white/50"
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />

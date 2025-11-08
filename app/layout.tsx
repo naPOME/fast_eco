@@ -16,8 +16,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Nextgen - Beauty E-Commerce",
-  description: "Discover amazing beauty products",
+  title: "Fast Eco-E-Commerce",
+  description: "Discover amazing  products",
 };
 
 export default function RootLayout({

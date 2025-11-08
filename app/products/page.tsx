@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
+  const [localProducts, setLocalProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [skip, setSkip] = useState(0);
@@ -23,6 +24,31 @@ export default function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const observerTarget = useRef<HTMLDivElement>(null);
   const limit = 10;
+
+  // Load locally created products from sessionStorage on mount
+  useEffect(() => {
+    const stored = sessionStorage.getItem("localProducts");
+    if (stored) {
+      setLocalProducts(JSON.parse(stored));
+    }
+  }, []);
+
+  // Listen for new product creation events
+  useEffect(() => {
+    const handleNewProduct = (event: CustomEvent) => {
+      const newProduct = event.detail;
+      setLocalProducts((prev) => {
+        const updated = [newProduct, ...prev];
+        sessionStorage.setItem("localProducts", JSON.stringify(updated));
+        return updated;
+      });
+    };
+
+    window.addEventListener("productCreated" as any, handleNewProduct);
+    return () => {
+      window.removeEventListener("productCreated" as any, handleNewProduct);
+    };
+  }, []);
 
   // Load categories on mount
   useEffect(() => {
@@ -37,7 +63,7 @@ export default function ProductsPage() {
     fetchCategories();
   }, []);
 
-  const loadProducts = useCallback(async (reset: boolean = false) => {
+  const loadProducts = async (reset: boolean = false) => {
     if (loading) return;
     
     setLoading(true);
@@ -55,32 +81,37 @@ export default function ProductsPage() {
 
       if (reset) {
         setProducts(response.products);
+        setSkip(limit);
       } else {
         setProducts((prev) => [...prev, ...response.products]);
+        setSkip(currentSkip + limit);
       }
       
-      setTotal(response.total);
-      setSkip(currentSkip + limit);
-      setHasMore(currentSkip + limit < response.total);
+      setTotal(response.total + localProducts.length);
+      setHasMore((reset ? limit : currentSkip + limit) < response.total);
     } catch (error) {
       console.error("Error loading products:", error);
       toast.error("Failed to load products");
     } finally {
       setLoading(false);
     }
-  }, [skip, searchQuery, selectedCategory, loading]);
+  };
 
   // Initial load
   useEffect(() => {
     loadProducts(true);
   }, []);
 
+  // Reload when search or category changes
+  useEffect(() => {
+    if (searchQuery !== "" || selectedCategory !== "all") {
+      loadProducts(true);
+    }
+  }, [searchQuery, selectedCategory]);
+
   // Handle search
   const handleSearch = useCallback((query: string) => {
     setSearchQuery(query);
-    setSkip(0);
-    setProducts([]);
-    setHasMore(true);
     setSelectedCategory("all");
   }, []);
 
@@ -88,17 +119,7 @@ export default function ProductsPage() {
   const handleCategoryChange = useCallback((category: string) => {
     setSelectedCategory(category);
     setSearchQuery("");
-    setSkip(0);
-    setProducts([]);
-    setHasMore(true);
   }, []);
-
-  // Load products when search query or category changes
-  useEffect(() => {
-    if (searchQuery !== undefined || selectedCategory !== undefined) {
-      loadProducts(true);
-    }
-  }, [searchQuery, selectedCategory]);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -121,7 +142,21 @@ export default function ProductsPage() {
         observer.unobserve(currentTarget);
       }
     };
-  }, [hasMore, loading, loadProducts]);
+  }, [hasMore, loading, skip]);
+
+  // Combine local and API products
+  const allProducts = [...localProducts, ...products];
+  const displayProducts = searchQuery || selectedCategory !== "all" 
+    ? allProducts.filter(p => {
+        const matchesSearch = searchQuery 
+          ? p.title.toLowerCase().includes(searchQuery.toLowerCase())
+          : true;
+        const matchesCategory = selectedCategory !== "all"
+          ? p.category === selectedCategory
+          : true;
+        return matchesSearch && matchesCategory;
+      })
+    : allProducts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,7 +168,7 @@ export default function ProductsPage() {
           <div>
             <h1 className="text-4xl font-bold mb-2">All Products</h1>
             <p className="text-muted-foreground">
-              {total > 0 ? `Showing ${products.length} of ${total} products` : "No products found"}
+              {total > 0 ? `Showing ${displayProducts.length} of ${total} products` : "No products found"}
             </p>
           </div>
           <Link href="/products/create">
@@ -179,10 +214,10 @@ export default function ProductsPage() {
         </div>
 
         {/* Products Grid */}
-        {products.length > 0 ? (
+        {displayProducts.length > 0 ? (
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {products.map((product) => (
+              {displayProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
@@ -216,7 +251,7 @@ export default function ProductsPage() {
         )}
 
         {/* Initial loading state */}
-        {loading && products.length === 0 && (
+        {loading && displayProducts.length === 0 && (
           <div className="flex justify-center items-center py-16">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
