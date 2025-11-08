@@ -39,4 +39,16 @@ export const productApi = {
     const response = await axios.delete(`${API_BASE_URL}/products/${id}`);
     return response.data;
   },
+
+  // Get categories
+  getCategories: async () => {
+    const response = await axios.get(`${API_BASE_URL}/products/categories`);
+    return response.data;
+  },
+
+  // Get products by category
+  getProductsByCategory: async (category: string, limit: number = 10, skip: number = 0) => {
+    const response = await axios.get(`${API_BASE_URL}/products/category/${category}?limit=${limit}&skip=${skip}`);
+    return response.data;
+  },
 };

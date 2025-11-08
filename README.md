@@ -12,6 +12,7 @@ A beautiful, feature-rich e-commerce application built with Next.js 15, TypeScri
 - **Product Listing** - Browse products with infinite scroll pagination
 - **Product Details** - View comprehensive product information with image gallery
 - **Search** - Real-time product search with debouncing
+- **Category Filter** - Filter products by category with dynamic category badges
 - **Create/Edit/Delete** - Full CRUD operations for products
 
 ### Favorites System
@@ -119,6 +120,7 @@ fast_eco/
 ### Product Management
 - **List:** Infinite scroll with 10 products per load
 - **Search:** Debounced search with instant results
+- **Category Filter:** Click category badges to filter products by category
 - **Details:** Full product info with image gallery
 - **Create:** Form with validation
 - **Edit:** Pre-filled form with update functionality
@@ -173,6 +175,8 @@ The app uses DummyJSON API for product data:
   - `GET /products` - List products
   - `GET /products/{id}` - Get single product
   - `GET /products/search?q={query}` - Search products
+  - `GET /products/categories` - Get all categories
+  - `GET /products/category/{category}` - Get products by category
   - `POST /products/add` - Create product
   - `PATCH /products/{id}` - Update product
   - `DELETE /products/{id}` - Delete product
@@ -202,7 +206,7 @@ This project is licensed under the MIT License.
 
 ## Author
 
-Built with  by the FASTeco Team
+Built with by the FASTeco Team
 
 ## Acknowledgments
 

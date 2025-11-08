@@ -10,6 +10,7 @@ import { Loader2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 export default function ProductsPage() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,8 +19,23 @@ export default function ProductsPage() {
   const [skip, setSkip] = useState(0);
   const [searchQuery, setSearchQuery] = useState("");
   const [total, setTotal] = useState(0);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const observerTarget = useRef<HTMLDivElement>(null);
   const limit = 10;
+
+  // Load categories on mount
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const cats = await productApi.getCategories();
+        setCategories(cats);
+      } catch (error) {
+        console.error("Error loading categories:", error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   const loadProducts = useCallback(async (reset: boolean = false) => {
     if (loading) return;
@@ -27,9 +43,15 @@ export default function ProductsPage() {
     setLoading(true);
     try {
       const currentSkip = reset ? 0 : skip;
-      const response = searchQuery
-        ? await productApi.searchProducts(searchQuery, limit, currentSkip)
-        : await productApi.getProducts(limit, currentSkip);
+      let response;
+
+      if (searchQuery) {
+        response = await productApi.searchProducts(searchQuery);
+      } else if (selectedCategory !== "all") {
+        response = await productApi.getProductsByCategory(selectedCategory, limit, currentSkip);
+      } else {
+        response = await productApi.getProducts(limit, currentSkip);
+      }
 
       if (reset) {
         setProducts(response.products);
@@ -46,7 +68,7 @@ export default function ProductsPage() {
     } finally {
       setLoading(false);
     }
-  }, [skip, searchQuery, loading]);
+  }, [skip, searchQuery, selectedCategory, loading]);
 
   // Initial load
   useEffect(() => {
@@ -59,14 +81,24 @@ export default function ProductsPage() {
     setSkip(0);
     setProducts([]);
     setHasMore(true);
+    setSelectedCategory("all");
   }, []);
 
-  // Load products when search query changes
+  // Handle category change
+  const handleCategoryChange = useCallback((category: string) => {
+    setSelectedCategory(category);
+    setSearchQuery("");
+    setSkip(0);
+    setProducts([]);
+    setHasMore(true);
+  }, []);
+
+  // Load products when search query or category changes
   useEffect(() => {
-    if (searchQuery !== undefined) {
+    if (searchQuery !== undefined || selectedCategory !== undefined) {
       loadProducts(true);
     }
-  }, [searchQuery]);
+  }, [searchQuery, selectedCategory]);
 
   // Infinite scroll observer
   useEffect(() => {
@@ -115,6 +147,30 @@ export default function ProductsPage() {
         {/* Search Bar */}
         <div className="mb-8 flex justify-center">
           <SearchBar onSearch={handleSearch} />
+        </div>
+
+        {/* Category Filter */}
+        <div className="mb-8">
+          <h3 className="text-sm font-semibold mb-3 text-muted-foreground">Filter by Category</h3>
+          <div className="flex flex-wrap gap-2">
+            <Badge
+              variant={selectedCategory === "all" ? "default" : "outline"}
+              className="cursor-pointer px-4 py-2 text-sm"
+              onClick={() => handleCategoryChange("all")}
+            >
+              All Products
+            </Badge>
+            {categories.map((category) => (
+              <Badge
+                key={category}
+                variant={selectedCategory === category ? "default" : "outline"}
+                className="cursor-pointer px-4 py-2 text-sm capitalize"
+                onClick={() => handleCategoryChange(category)}
+              >
+                {category.replace(/-/g, " ")}
+              </Badge>
+            ))}
+          </div>
         </div>
 
         {/* Products Grid */}
