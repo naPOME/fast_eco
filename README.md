@@ -54,7 +54,7 @@ A beautiful, feature-rich e-commerce application built with Next.js 15, TypeScri
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
+git clone https://github.com/naPOME/fast_eco
 cd fast_eco
 ```
 
